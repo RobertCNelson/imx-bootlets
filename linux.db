@@ -1,10 +1,10 @@
-// STMP378x ROM command script to load and run Linux kernel
+// IMX23_OLINUXINO  ROM command script to load and run Linux kernel
 
 sources {
 	power_prep="./power_prep/power_prep";
 	sdram_prep="./boot_prep/boot_prep";
 	linux_prep="./linux_prep/output-target/linux_prep";
-	zImage="/home/b18647/repos/ltib_latest/rootfs/boot/zImage";
+	zImage="../../kernel/linux-3.6-rc1/arch/arm/boot/zImage";
 }
 
 section (0) {

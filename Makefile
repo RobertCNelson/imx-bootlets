@@ -3,9 +3,9 @@ MEM_TYPE ?= MEM_DDR1
 export MEM_TYPE
 
 DFT_IMAGE=$(DEV_IMAGE)/boot/zImage
-DFT_UBOOT=$(DEV_IMAGE)/boot/u-boot
+DFT_UBOOT=../boot/u-boot
 
-BOARD ?= stmp378x_dev
+BOARD ?= imx23_olinuxino_dev
 
 ifeq ($(BOARD), stmp37xx_dev)
 ARCH = 37xx
@@ -15,6 +15,12 @@ ARCH = mx23
 endif
 ifeq ($(BOARD), iMX28_EVK)
 ARCH = mx28
+endif
+ifeq ($(BOARD), imx23_olinuxino_dev)
+ARCH = mx23
+endif
+ifeq ($(BOARD), imx23_olinuxino_dev)
+ARCH = mx23
 endif
 
 all: build_prep gen_bootstream
@@ -33,17 +39,17 @@ ifeq "$(DFT_IMAGE)" "$(wildcard $(DFT_IMAGE))"
 	elftosb2 -z -c ./uboot.db -o i$(ARCH)_uboot.sb
 else
 	@echo "by using the pre-built kernel"
-	elftosb2 -z -c ./linux_prebuilt.db -o i$(ARCH)_linux.sb
-	@echo "generating U-Boot boot stream image"
-	elftosb2 -z -c ./uboot_prebuilt.db -o i$(ARCH)_uboot.sb
+	elftosb2 -d -z -c ./linux_prebuilt.db -o i$(ARCH)_linux.sb
+	#@echo "generating U-Boot boot stream image"
+	#elftosb2 -z -c ./uboot_prebuilt.db -o i$(ARCH)_uboot.sb
 endif
-	#@echo "generating kernel bootstream file sd_mmc_bootstream.raw"
+	echo "generating kernel bootstream file sd_mmc_bootstream.raw"
 	#Please use cfimager to burn xxx_linux.sb. The below way will no
 	#work at imx28 platform.
-	#rm -f sd_mmc_bootstream.raw
-	#dd if=/dev/zero of=sd_mmc_bootstream.raw bs=512 count=4
-	#dd if=imx233_linux.sb of=sd_mmc_bootstream.raw ibs=512 seek=4 \
-	#conv=sync,notrunc
+	rm -f sd_mmc_bootstream.raw
+	dd if=/dev/zero of=sd_mmc_bootstream.raw bs=512 count=4
+	dd if=imx23_linux.sb of=sd_mmc_bootstream.raw ibs=512 seek=4 \
+	conv=sync,notrunc
 	@echo "To install bootstream onto SD/MMC card, type: sudo dd \
 	if=sd_mmc_bootstream.raw of=/dev/sdXY where X is the correct letter \
 	for your sd or mmc device (to check, do a ls /dev/sd*) and Y \
@@ -93,6 +99,8 @@ distclean: clean
 clean:
 	-rm -rf *.sb
 	rm -f sd_mmc_bootstream.raw
+	rm -f linux_prep/board/*.o
+	rm -f power_prep/*.o
 	$(MAKE) -C linux_prep clean ARCH=$(ARCH)
 	$(MAKE) -C boot_prep clean ARCH=$(ARCH)
 	$(MAKE) -C power_prep clean ARCH=$(ARCH)
